@@ -1,6 +1,6 @@
 import os
 import sys
-import vm_arithmetic, vm_memory
+import vm_arithmetic, vm_memory, vm_flow
 
 VM_COMMENT_INITIAL = '//'
 
@@ -50,11 +50,11 @@ def translate(parsed_line, filename):
 		return vm_arithmetic.compare(instruction)
 	# Program flow commands
 	elif instruction == 'label':
-		pass # TODO handle label
+		return vm_flow.label(arg1)
 	elif instruction == 'goto':
-		pass # TODO handle goto
+		return vm_flow.goto(arg1)
 	elif instruction == 'if-goto':
-		pass # TODO handle if-goto
+		return vm_flow.if_goto(arg1)
 	elif instruction == 'call':
 		pass # TODO handle call
 	elif instruction == 'return':
