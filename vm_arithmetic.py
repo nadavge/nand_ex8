@@ -2,8 +2,8 @@ def unary_operation(f):
 	"""Unary operation function wrapper to hold the top element from
 	the stack in M, popping it from the stack"""
 	def wrapper(*args, **kwargs):
-		command = """@SP
-A = M-1; // Point to top element\n"""
+		command = '''@SP
+			A = M-1; // Point to top element\n'''
 		return command + f(*args, **kwargs)
 		
 	return wrapper
@@ -12,10 +12,10 @@ def binary_operation(f):
 	"""Binary operation function wrapper to extract the first element
 	from the stack to D, second element held in M, popping them	from the stack"""
 	def wrapper(*args, **kwargs):
-		command = """@SP
-AM = M-1; // Point to where the stack top element is, decrease SP
-D = M; // Take value of top element
-A = A-1; // Point to second top element\n"""
+		command = '''@SP
+			AM = M-1; // Point to where the stack top element is, decrease SP
+			D = M; // Take value of top element
+			A = A-1; // Point to second top element\n'''
 		return command + f(*args, **kwargs)
 		
 	return wrapper
@@ -54,18 +54,18 @@ def compare(instruction):
 	by using jumps"""
 	global cid
 	jmp = jmp_instruction[instruction]
-	command = """D=M-D;
-@h_true.{cid}
-D;{jmp}
-D = 0;
-@h_finish.{cid}
-0;JMP
-(h_true.{cid})
-D = -1;
-(h_finish.{cid})
-@SP
-A = M-1;
-M = D;\n""".format(cid=cid, jmp=jmp)
+	command = '''D=M-D;
+		@h_true.{cid}
+		D;{jmp}
+		D = 0;
+		@h_finish.{cid}
+		0;JMP
+		(h_true.{cid})
+		D = -1;
+		(h_finish.{cid})
+		@SP
+		A = M-1;
+		M = D;\n'''.format(cid=cid, jmp=jmp)
 	
 	cid += 1
 	

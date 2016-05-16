@@ -19,9 +19,13 @@ def parse(line):
 
 	return split_line
 
+last_func = None # Holds the name of the last function declared
+
 def translate(parsed_line, filename):
 	"""Translate a vm parsed line to hack assembly
 	@return hack assembly code corresponding to the line as a string"""
+	
+	global last_func
 	
 	# The command is of the structure [INSTRUCTION, ARG1*, ARG2*]
 	instruction = parsed_line[0]
@@ -30,9 +34,9 @@ def translate(parsed_line, filename):
 	
 	# Memory commands
 	if instruction == 'push':
-		return vm_memory.push(arg1, arg2, filename)
+		return vm_memory.push(segment=arg1, i=arg2, filename=filename)
 	elif instruction == 'pop':
-		return vm_memory.pop(arg1, arg2, filename)
+		return vm_memory.pop(segment=arg1, i=arg2, filename=filename)
 	# Arithmetic commands
 	elif instruction == 'neg':
 		return vm_arithmetic.neg()
@@ -50,17 +54,18 @@ def translate(parsed_line, filename):
 		return vm_arithmetic.compare(instruction)
 	# Program flow commands
 	elif instruction == 'label':
-		return vm_flow.label(arg1)
+		return vm_flow.label(name=arg1, function=last_func)
 	elif instruction == 'goto':
-		return vm_flow.goto(arg1)
+		return vm_flow.goto(name=arg1, function=last_func)
 	elif instruction == 'if-goto':
-		return vm_flow.if_goto(arg1)
+		return vm_flow.if_goto(name=arg1, function=last_func)
 	elif instruction == 'call':
-		pass # TODO handle call
+		return vm_flow.call(func=arg1, argc=arg2)
 	elif instruction == 'return':
-		pass # TODO handle return
+		return vm_flow.return_()
 	elif instruction == 'function':
-		pass # TODO handle function, also save last function
+		last_func = arg1 # Store the context of this function from now on
+		return vm_flow.function(arg1, arg2)
 	
 	print("Unknown command: {}".format(parsed_line))
 	sys.exit(1)
@@ -74,8 +79,9 @@ def process(file, filename):
 		if not parsed_line:
 			continue
 
-		yield translate(parsed_line, filename)
-		
+		# TODO remove debug print
+		yield '//' + line + translate(parsed_line, filename)
+		#yield translate(parsed_line, filename)
 
 def translate_file(file_path, output=None):
 	"""Translate a file by filepath, save the result
