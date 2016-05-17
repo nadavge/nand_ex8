@@ -8,6 +8,7 @@ def unary_operation(f):
 		
 	return wrapper
 
+
 def binary_operation(f):
 	"""Binary operation function wrapper to extract the first element
 	from the stack to D, second element held in M, popping them	from the stack"""
@@ -20,29 +21,36 @@ def binary_operation(f):
 		
 	return wrapper
 
+
 @unary_operation
 def neg():
 	return 'M = -M;\n'
+
 
 @unary_operation
 def not_():
 	return 'M = !M;\n'
 
+
 @binary_operation
 def add():
 	return 'M = D+M;\n'
+
 
 @binary_operation
 def sub():
 	return 'M = M-D;\n'
 
+
 @binary_operation
 def and_():
 	return 'M = D&M;\n'
 
+
 @binary_operation
 def or_():
 	return 'M = D|M;\n'
+
 
 cid = 0 # Compare id, used to label the comparison jumps
 jmp_instruction = {'eq' : 'JEQ',

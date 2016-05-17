@@ -2,7 +2,9 @@ import os
 import sys
 import vm_arithmetic, vm_memory, vm_flow
 
+
 VM_COMMENT_INITIAL = '//'
+
 
 def parse(line):
 	"""Parse a vm line
@@ -19,6 +21,7 @@ def parse(line):
 
 	return split_line
 
+	
 last_func = None # Holds the name of the last function declared
 
 def translate(parsed_line, filename):
@@ -70,6 +73,7 @@ def translate(parsed_line, filename):
 	print("Unknown command: {}".format(parsed_line))
 	sys.exit(1)
 
+	
 def process(file, filename):
 	"""Manage the translation process
 	@return a generator for the the translation of commands"""
@@ -79,9 +83,13 @@ def process(file, filename):
 		if not parsed_line:
 			continue
 
-		# TODO remove debug print
 		yield '//' + line + translate(parsed_line, filename)
-		#yield translate(parsed_line, filename)
+
+		
+def bootstrap(ofile):
+	"""Bootstrap the file using the flow mechanisms"""
+	ofile.write(vm_flow.bootstrap())
+	
 
 def translate_file(file_path, output=None):
 	"""Translate a file by filepath, save the result
@@ -99,6 +107,7 @@ def translate_file(file_path, output=None):
 		if output is None:
 			ofile_path = file_path_no_ext+'.asm'
 			with open(ofile_path, 'w') as ofile:
+				bootstrap(ofile)
 				for command in result:
 					ofile.write(command)
 		else:
@@ -111,6 +120,7 @@ def translate_dir(dir_path):
 	dir_name = os.path.basename(os.path.normpath(dir_path))
 	ofilename = os.path.join(dir_path, dir_name+'.asm')
 	with open(ofilename, 'w') as ofile:
+		bootstrap(ofile)
 		for file in os.listdir(dir_path):
 			file_path = os.path.join(dir_path, file)
 			_, file_ext = os.path.splitext(file_path)

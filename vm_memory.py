@@ -5,6 +5,7 @@ segment_symbols = {'local'   : 'LCL',
 segment_constants = {'pointer' : '3', 
                      'temp'    : '5'}
 
+
 def push(segment, i, filename):
 	"""Push the value in segment:i to the stack"""
 	
@@ -30,15 +31,18 @@ def push(segment, i, filename):
 		command += '@s_' + filename + '.' + i + '\n'
 		command += 'D = M;\n'
 		
-	command += """@SP
-A = M; // Point to where the stack is
-M = D; // Put *(BASE+<i>) in stack
-@SP
-M = M+1; // Increase SP\n"""
+	command += '''@SP
+		A = M; // Point to where the stack is
+		M = D; // Put *(BASE+<i>) in stack
+		@SP
+		M = M+1; // Increase SP\n'''
 	
 	return command
-		
+
+
 def pop(segment, i, filename):
+	"""Pop the value from the stack to segment:i"""
+
 	command = ''
 	
 	if segment in segment_symbols or segment in segment_constants:
@@ -56,15 +60,15 @@ def pop(segment, i, filename):
 		command += '@s_' + filename + '.' + i + '\n'
 		command += 'D = A;\n'
 	
-	command += """@R13
-M = D; //Hold target address at R13
-// What to pop
-@SP
-AM = M-1; // Point to where the stack top element is, decrease SP
-D = M; // Take value of top element
-// Restore the target address
-@R13
-A = M; // Point to target address
-M = D; // Store pop result in target\n"""
+	command += '''@R13
+		M = D; //Hold target address at R13
+		// What to pop
+		@SP
+		AM = M-1; // Point to where the stack top element is, decrease SP
+		D = M; // Take value of top element
+		// Restore the target address
+		@R13
+		A = M; // Point to target address
+		M = D; // Store pop result in target\n'''
 	
 	return command

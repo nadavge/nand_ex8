@@ -1,21 +1,27 @@
 def label_asm(name, function=None):
 	"""The assembly implementation of a label"""
-	return 'l_{name}'.format(name=name)
+	if function is None:
+		return 'l_{name}'.format(name=name)
+	return 'l_{function}${name}'.format(name=name, function=function)
+
 
 def func_label_asm(name):
 	"""The assembly implementation of a function label"""
 	return 'f_{name}'.format(name=name)
-	
+
+
 def label(name, function=None):
 	"""Insert a label to the code from the given function"""
 	label_name = label_asm(name, function)
 	return '({label})\n'.format(label=label_name)
+
 
 def goto(name, function=None):
 	"""Go to a label in the code from the given function"""
 	label_name = label_asm(name, function)
 	return '''@{label}
 		0;JMP\n'''.format(label=label_name)
+
 
 def if_goto(name, function=None):
 	"""Go to a label like @goto based on a condition
@@ -26,6 +32,7 @@ def if_goto(name, function=None):
 		D = M; // Hold it in D
 		@{label}
 		D;JNE // jump in case of non-zero\n'''.format(label=label_name)
+
 
 rid = 0 # Return id - a counter for temp return labels for function calls
 
@@ -38,25 +45,27 @@ def call(func, argc):
 	arg_dist = int(argc) + 5 # The distance between SP and the arguments
 	
 	def _repush_label(name):
-		"""Push a label, assuming SP is currently pointing to the top element"""
+		'''Push a label, assuming SP is currently pointing to the top element'''
 		return '''@{label}
 			D = M;
 			@SP
 			AM = M+1;
 			M = D;\n'''.format(label=name)
 
+	# Push the return address to the stack
 	command = '''@h_return.{rid} // ** Push return address
 		D = A; // Hold the return address at D
 		@SP
 		A = M;
 		M = D;\n'''
+	# Push the pointers to the stack
 	command += ''.join(_repush_label(lbl) for lbl in ['LCL', 'ARG', 'THIS', 'THAT'])
 	# _repush_label assumes the SP points to the top element and leaves it this way
 	# so we advance the SP to fix this
 	command += '''@SP // Fix SP
 		MD = M+1; // Calculate ARG and LCL
 		@LCL
-		M = D; // LCL now points to locals start
+		M = D; // LCL now points to locals start, where SP is
 		@{arg_dist}
 		D = D-A;
 		@ARG
@@ -69,6 +78,7 @@ def call(func, argc):
 	rid += 1
 
 	return command
+
 
 def function(func, locals):
 	"""Declare a function with a given number of local variables"""
@@ -93,6 +103,7 @@ def function(func, locals):
 
 	return command
 
+
 def return_():
 	"""Return from a function, retrieving the previous stack frame"""
 
@@ -111,7 +122,7 @@ def return_():
 		D = M; // Pop top-most element
 		@ARG
 		A = M;
-		M = D;
+		M = D; // *(ARG) = return value
 		D = A; // D = ARG
 		@SP
 		M = D+1; // SP points to ARG+1\n'''
@@ -134,3 +145,12 @@ def return_():
 		0; JMP\n'''
 	
 	return command
+
+
+def bootstrap():
+	"""Set up the bootstrap code, write it into the file"""
+
+	return '''@256
+		D = A;
+		@SP
+		M = D;\n''' + call('Sys.init', '0')
