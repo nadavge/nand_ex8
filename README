@@ -1,0 +1,21 @@
+Nadav Geva, nadavgeva4@gmail.com
+Or Sagy, orlusai@gmail.com
+===============================================================================
+
+                           Project 8 - Virtual Machine (Control)
+                           -------------------------------------
+
+
+Submitted Files
+---------------
+| README - This file!
+| Makefile - The makefile for the project
+| VMtranslator.py - A VM translator implementation over Hack
+| VMtranslator - An execution script for the translator
+| vm_arithmetics.py - The VM arithmetic module for the translator
+| vm_memory.py - The VM memory module for the translator
+| vm_flow.py - The VM flow control module for the translator
+
+Remarks
+-------
+In order to run the project, you must make the project first :)
